@@ -56,7 +56,12 @@ extern crate serde;
 extern crate serde_json;
 
 pub mod builder;
-pub mod model;
+
+pub mod model {
+    //! Models for the Kitsu API, retrieved via the REST API.
+
+    include!(concat!(env!("OUT_DIR"), "/models.rs"));
+}
 
 mod error;
 mod request;
