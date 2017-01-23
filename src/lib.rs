@@ -60,7 +60,7 @@ pub mod builder;
 pub mod model {
     //! Models for the Kitsu API, retrieved via the REST API.
 
-    include!(concat!(env!("OUT_DIR"), "/models.rs"));
+    include!(concat!(env!("OUT_DIR"), "/model.rs"));
 }
 
 mod error;
