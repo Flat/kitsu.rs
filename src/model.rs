@@ -1,3 +1,4 @@
+//! A collection of models for use with - and returned by - the Kitsu API.
 // ISC License (ISC)
 //
 // Copyright (c) 2016, Austin Hellyer <hello@austinhellyer.me>
