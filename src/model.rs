@@ -60,14 +60,14 @@ pub struct AnimeAttributes {
     ///
     //// [`AgeRating::R`]
     #[serde(rename="ageRating")]
-    pub age_rating: AgeRating,
+    pub age_rating: Option<AgeRating>,
     /// Description of the age rating.
     ///
     /// # Examples
     ///
     /// `Violence, Profanity`
     #[serde(rename="ageRatingGuide")]
-    pub age_rating_guide: String,
+    pub age_rating_guide: Option<String>,
     /// The average of all user ratings for the anime.
     ///
     /// # Examples
@@ -109,14 +109,14 @@ pub struct AnimeAttributes {
     ///
     /// `25`
     #[serde(rename="episodeCount")]
-    pub episode_count: u8,
+    pub episode_count: Option<u32>,
     /// How many minutes long each episode is.
     ///
     /// # Examples
     ///
     /// `24`
     #[serde(rename="episodeLength")]
-    pub episode_length: u8,
+    pub episode_length: Option<u32>,
     /// Show format of the anime.
     ///
     /// # Examples
@@ -260,7 +260,7 @@ pub struct Manga {
 pub struct MangaAttributes {
     /// Shortened nicknames for the manga.
     #[serde(rename="abbreviatedTitles")]
-    pub abbreviated_titles: Option<Value>,
+    pub abbreviated_titles: Vec<String>,
     /// The average of all user ratings for the manga.
     ///
     /// # Examples
