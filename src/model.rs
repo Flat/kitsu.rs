@@ -735,7 +735,7 @@ pub enum MangaType {
 }
 
 /// The type of result from a search or retrieval.
-#[derive(Clone, Copy, Debug, Deserialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd)]
 pub enum Type {
     /// Indicator that the result is an [`Anime`].
     ///
