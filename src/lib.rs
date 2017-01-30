@@ -51,17 +51,14 @@
 //! [license file]: https://raw.githubusercontent.com/zeyla/kitsu.rs/master/LICENSE.md
 #![warn(missing_docs)]
 
+#[macro_use] extern crate serde_derive;
+
 extern crate hyper;
 extern crate serde;
 extern crate serde_json;
 
 pub mod builder;
-
-pub mod model {
-    //! Models for the Kitsu API, retrieved via the REST API.
-
-    include!(concat!(env!("OUT_DIR"), "/model.rs"));
-}
+pub mod model;
 
 mod error;
 mod request;
