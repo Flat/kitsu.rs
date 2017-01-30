@@ -356,37 +356,37 @@ pub struct MangaAttributes {
 pub struct RatingFrequencies {
     /// Number of 0 stars given.
     #[serde(default, rename="0.0")]
-    pub rating_0_0: u64,
+    pub rating_0_0: i64,
     /// Number of 0.5 stars given.
     #[serde(default, rename="0.5")]
-    pub rating_0_5: u64,
+    pub rating_0_5: i64,
     /// Number of 1.0 stars given.
     #[serde(default, rename="1.0")]
-    pub rating_1_0: u64,
+    pub rating_1_0: i64,
     /// Nubmer of 1.5 stars given.
     #[serde(default, rename="1.5")]
-    pub rating_1_5: u64,
+    pub rating_1_5: i64,
     /// Number of 2.0 stars given.
     #[serde(default, rename="2.0")]
-    pub rating_2_0: u64,
+    pub rating_2_0: i64,
     /// Number of 2.5 stars given.
     #[serde(default, rename="2.5")]
-    pub rating_2_5: u64,
+    pub rating_2_5: i64,
     /// Number of 3.0 stars given.
     #[serde(default, rename="3.0")]
-    pub rating_3_0: u64,
+    pub rating_3_0: i64,
     /// Number of 3.5 stars given.
     #[serde(default, rename="3.5")]
-    pub rating_3_5: u64,
+    pub rating_3_5: i64,
     /// Number of 4.0 stars given.
     #[serde(default, rename="4.0")]
-    pub rating_4_0: u64,
+    pub rating_4_0: i64,
     /// Number of 4.5 stars given.
     #[serde(default, rename="4.5")]
-    pub rating_4_5: u64,
+    pub rating_4_5: i64,
     /// Number of 5.0 stars given.
     #[serde(default, rename="5.0")]
-    pub rating_5_0: u64,
+    pub rating_5_0: i64,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -676,6 +676,8 @@ pub enum AgeRating {
     /// Indicator that the anime is rated R-17+.
     #[serde(rename="R17+")]
     R17Plus,
+    /// Indicator that the anime is rated R18.
+    R18,
     /// Indicator that the anime is rated R-18+.
     #[serde(rename="R18+")]
     R18Plus,
@@ -687,7 +689,7 @@ pub enum AgeRating {
 /// The type of [`Anime`].
 ///
 /// [`Anime`]: struct.Anime.html
-#[derive(Clone, Copy, Debug, Deserialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd)]
 pub enum AnimeType {
     /// Indicator that the anime is a movie.
     #[serde(rename="movie")]
