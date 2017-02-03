@@ -98,7 +98,7 @@ pub fn search_users<F: FnOnce(Search) -> Search>(f: F) -> Result<Response<Vec<Us
 mod tests {
     #[test]
     fn anime() {
-        let r = ::search_anime(|f| f.filter("text", "non non biyori")).expect("nnb");
+        let _ = ::search_anime(|f| f.filter("text", "non non biyori")).expect("nnb");
         let _ = ::get_anime(7711).expect("1 res ret");
 
         // Test that AgeRating TV-Y7 is handled. Undocumented age rating.

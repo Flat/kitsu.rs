@@ -16,8 +16,10 @@
 // PERFORMANCE OF THIS SOFTWARE.
 
 use serde::Deserialize;
-use serde_json::Value;
+use serde_json;
 use std::collections::HashMap;
+use std::mem;
+use super::{Result, request};
 
 /// Information about an anime, retrieved via [`get_anime`] or [`search_anime`].
 ///
@@ -40,6 +42,41 @@ pub struct Anime {
     pub relationships: AnimeRelationships,
 }
 
+impl Anime {
+    /// Gets an anime by its Id.
+    #[inline]
+    pub fn get(id: u64) -> Result<Anime> {
+        Ok(request::get_anime(id)?.data)
+    }
+
+    /// The current airing status of the anime.
+    #[inline]
+    pub fn airing_status(&self) -> AiringStatus {
+        self.attributes.airing_status()
+    }
+
+    /// Refreshes the instance of the anime, retrieving the anime and replacing
+    /// the current instance with it. Returns the old copy.
+    #[inline]
+    pub fn refresh(&mut self) -> Result<Anime> {
+        let id = self.id;
+
+        Ok(mem::replace(self, Anime::get(id)?))
+    }
+
+    /// Generates a URL to the Kitsu page for the anime.
+    #[inline]
+    pub fn url(&self) -> String {
+        self.attributes.url()
+    }
+
+    /// Generates a formatted URL to the youtube video.
+    #[inline]
+    pub fn youtube_url(&self) -> Option<String> {
+        self.attributes.youtube_url()
+    }
+}
+
 /// Information about an [`Anime`].
 ///
 /// [`Anime`]: struct.Anime.html
@@ -53,7 +90,7 @@ pub struct AnimeAttributes {
     ///
     /// [`Anime`]: struct.Anime.html
     #[serde(rename="abbreviatedTitles")]
-    pub abbreviated_titles: Option<Value>,
+    pub abbreviated_titles: Vec<String>,
     /// Age rating for the anime.
     ///
     /// # Examples
@@ -169,6 +206,29 @@ pub struct AnimeAttributes {
     pub youtube_video_id: Option<String>,
 }
 
+impl AnimeAttributes {
+    /// The current airing status of the anime.
+    pub fn airing_status(&self) -> AiringStatus {
+        if self.end_date.is_some() {
+            AiringStatus::Finished
+        } else {
+            AiringStatus::Airing
+        }
+    }
+
+    /// Generates a URL to the Kitsu page for the anime.
+    #[inline]
+    pub fn url(&self) -> String {
+        format!("https://kitsu.io/anime/{}", self.slug)
+    }
+
+    /// Generates a formatted URL to the youtube video.
+    #[inline]
+    pub fn youtube_url(&self) -> Option<String> {
+        self.youtube_video_id.as_ref().map(youtube_url)
+    }
+}
+
 /// Links related to the media item.
 #[derive(Clone, Debug, Deserialize)]
 pub struct Links {
@@ -219,6 +279,14 @@ pub struct CoverImage {
     pub small: Option<String>,
 }
 
+impl CoverImage {
+    /// Retrieves the URL to the largest cover image in descending order where
+    /// available, if any.
+    pub fn largest<'a>(&'a self) -> Option<&'a String> {
+        self.large.as_ref().or(self.original.as_ref()).or(self.small.as_ref())
+    }
+}
+
 /// A list of links to the media's relevant images.
 #[derive(Clone, Debug, Deserialize)]
 pub struct Image {
@@ -232,6 +300,18 @@ pub struct Image {
     pub small: Option<String>,
     /// Link to a tiny size of the image.
     pub tiny: Option<String>,
+}
+
+impl Image {
+    /// Retrieves the URL to the largest image in descending order where
+    /// available, if any.
+    pub fn largest<'a>(&'a self) -> Option<&'a String> {
+        self.large.as_ref()
+            .or(self.medium.as_ref())
+            .or(self.original.as_ref())
+            .or(self.small.as_ref())
+            .or(self.tiny.as_ref())
+    }
 }
 
 /// Information about a manga, retrived via [`get_manga`] or [`search_manga`].
@@ -251,6 +331,41 @@ pub struct Manga {
     pub kind: Type,
     /// Links related to the manga.
     pub links: HashMap<String, String>,
+}
+
+impl Manga {
+    /// Gets a manga by its Id.
+    #[inline]
+    pub fn get(id: u64) -> Result<Manga> {
+        Ok(request::get_manga(id)?.data)
+    }
+
+    /// The current airing status of the manga.
+    #[inline]
+    pub fn airing_status(&self) -> AiringStatus {
+        self.attributes.airing_status()
+    }
+
+    /// Refreshes the instance of the manga, retrieving the manga and replacing
+    /// the current instance with it. Returns the old copy.
+    #[inline]
+    pub fn refresh(&mut self) -> Result<Manga> {
+        let id = self.id;
+
+        Ok(mem::replace(self, Manga::get(id)?))
+    }
+
+    /// Generates a URL to the Kitsu page for the manga.
+    #[inline]
+    pub fn url(&self) -> String {
+        self.attributes.url()
+    }
+
+    /// Generates a formatted URL to the youtube video.
+    #[inline]
+    pub fn youtube_url(&self) -> Option<String> {
+        self.attributes.youtube_url()
+    }
 }
 
 /// Information about a [`Manga`].
@@ -349,6 +464,29 @@ pub struct MangaAttributes {
     /// The id of the related YouTube video.
     #[serde(rename="youtubeVideoId")]
     pub youtube_video_id: Option<String>,
+}
+
+impl MangaAttributes {
+    /// The current airing status of the manga.
+    pub fn airing_status(&self) -> AiringStatus {
+        if self.end_date.is_some() {
+            AiringStatus::Finished
+        } else {
+            AiringStatus::Airing
+        }
+    }
+
+    /// Generates a URL to the Kitsu page for the manga.
+    #[inline]
+    pub fn url(&self) -> String {
+        format!("https://kitsu.io/manga/{}", self.slug)
+    }
+
+    /// Generates a formatted URL to the youtube video.
+    #[inline]
+    pub fn youtube_url(&self) -> Option<String> {
+        self.youtube_video_id.as_ref().map(youtube_url)
+    }
 }
 
 /// How many times each rating has been given to the media item.
@@ -660,7 +798,7 @@ pub struct UserRelationships {
 /// The age rating of the [`Anime`].
 ///
 /// [`Anime`]: struct.Anime.html
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
 pub enum AgeRating {
     /// Indicator that the anime is rated G.
     G,
@@ -686,10 +824,51 @@ pub enum AgeRating {
     TvY7,
 }
 
+impl AgeRating {
+    /// The name of the age rating.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use kitsu_io::model::AgeRating;
+    ///
+    /// assert_eq!(AgeRating::PG.name().unwrap(), "PG");
+    /// ```
+    pub fn name(&self) -> Result<String> {
+        let mut name = serde_json::to_string(self)?;
+
+        // Serde wraps the encoded string in quotation marks, so remove those.
+        let _ = name.remove(0);
+        let _ = name.pop();
+
+        Ok(name)
+    }
+}
+
+/// The airing status of an [`Anime`].
+///
+/// [`Anime`]: struct.Anime.html
+pub enum AiringStatus {
+    /// Indicator that the anime is currently airing.
+    Airing,
+    /// Indicator that the anime has finished airing.
+    Finished,
+}
+
+impl AiringStatus {
+    /// The name of the airing status.
+    pub fn name(&self) -> &str {
+        match *self {
+            AiringStatus::Airing => "airing",
+            AiringStatus::Finished => "finished",
+        }
+    }
+}
+
 /// The type of [`Anime`].
 ///
 /// [`Anime`]: struct.Anime.html
-#[derive(Clone, Copy, Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
 pub enum AnimeType {
     /// Indicator that the anime is a movie.
     #[serde(rename="movie")]
@@ -708,36 +887,108 @@ pub enum AnimeType {
     TV,
 }
 
+impl AnimeType {
+    /// The name of the [anime][`Anime`] type.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use kitsu_io::model::AnimeType;
+    ///
+    /// assert_eq!(AnimeType::Movie.name().unwrap(), "movie");
+    /// assert_eq!(AnimeType::TV.name().unwrap(), "TV");
+    /// ```
+    ///
+    /// [`Anime`]: struct.Anime.html
+    pub fn name(&self) -> Result<String> {
+        let mut name = serde_json::to_string(self)?;
+
+        let _ = name.remove(0);
+        let _ = name.pop();
+
+        Ok(name)
+    }
+}
+
 /// The [`User`]'s gender.
 ///
 /// [`User`]: struct.User.html
-#[derive(Clone, Copy, Debug, Deserialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
 pub enum Gender {
     /// Indicator that the user is female.
+    #[serde(rename="female")]
     Female,
+    #[serde(rename="male")]
     /// Indicator that the user is male.
     Male,
+}
+
+impl Gender {
+    /// The name of the [user][`User`]'s gender.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use kitsu_io::model::Gender;
+    ///
+    /// assert_eq!(Gender::Female.name().unwrap(), "female");
+    /// ```
+    ///
+    /// [`User`]: struct.User.html
+    pub fn name(&self) -> Result<String> {
+        let mut name = serde_json::to_string(self)?;
+
+        let _ = name.remove(0);
+        let _ = name.pop();
+
+        Ok(name)
+    }
 }
 
 /// The type of a [`Manga`].
 ///
 /// [`Manga`]: struct.Manga.html
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
 pub enum MangaType {
     /// Indicator that the manga is a doujin.
+    #[serde(rename="doujin")]
     Doujin,
     /// Indicator that the manga is a regular manga.
+    #[serde(rename="manga")]
     Manga,
     /// Indicator that the manga is a manhua.
+    #[serde(rename="manhua")]
     Manhua,
     /// Indicator that the manga is a novel.
+    #[serde(rename="novel")]
     Novel,
     /// Indicator that the manga is a oneshot.
+    #[serde(rename="oneshot")]
     Oneshot,
 }
 
+impl MangaType {
+    /// The name of the age rating.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use kitsu_io::model::MangaType;
+    ///
+    /// assert_eq!(MangaType::Novel.name().unwrap(), "novel");
+    /// ```
+    pub fn name(&self) -> Result<String> {
+        let mut name = serde_json::to_string(self)?;
+
+        let _ = name.remove(0);
+        let _ = name.pop();
+
+        Ok(name)
+    }
+}
+
 /// The type of result from a search or retrieval.
-#[derive(Clone, Copy, Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
 pub enum Type {
     /// Indicator that the result is an [`Anime`].
     ///
@@ -759,13 +1010,60 @@ pub enum Type {
     User,
 }
 
+impl Type {
+    /// The name of the age rating.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use kitsu_io::model::Type;
+    ///
+    /// assert_eq!(Type::Anime.name().unwrap(), "anime");
+    /// ```
+    pub fn name(&self) -> Result<String> {
+        let mut name = serde_json::to_string(self)?;
+
+        let _ = name.remove(0);
+        let _ = name.pop();
+
+        Ok(name)
+    }
+}
+
 /// Indicator of whether a [`User`] has a waifu or husbando.
 ///
 /// [`User`]: struct.User.html
-#[derive(Clone, Copy, Debug, Deserialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
 pub enum WaifuOrHusbando {
     /// Indicator that the user has a husbando.
+    #[serde(rename="husbando")]
     Husbando,
     /// Indicator that the user has a waifu.
+    #[serde(rename="waifu")]
     Waifu,
+}
+
+impl WaifuOrHusbando {
+    /// The name of the age rating.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use kitsu_io::model::WaifuOrHusbando;
+    ///
+    /// assert_eq!(WaifuOrHusbando::Husbando.name().unwrap(), "husbando");
+    /// ```
+    pub fn name(&self) -> Result<String> {
+        let mut name = serde_json::to_string(self)?;
+
+        let _ = name.remove(0);
+        let _ = name.pop();
+
+        Ok(name)
+    }
+}
+
+#[inline]
+fn youtube_url(id: &String) -> String {
+    format!("https://www.youtube.com/watch?v={}", id)
 }
