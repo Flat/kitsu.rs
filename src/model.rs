@@ -282,8 +282,12 @@ pub struct CoverImage {
 impl CoverImage {
     /// Retrieves the URL to the largest cover image in descending order where
     /// available, if any.
+    ///
+    /// This places priority on the [`original`] field.
+    ///
+    /// [`original`]: #structfield.original
     pub fn largest<'a>(&'a self) -> Option<&'a String> {
-        self.large.as_ref().or(self.original.as_ref()).or(self.small.as_ref())
+        self.original.as_ref().or(self.large.as_ref()).or(self.small.as_ref())
     }
 }
 
@@ -305,10 +309,14 @@ pub struct Image {
 impl Image {
     /// Retrieves the URL to the largest image in descending order where
     /// available, if any.
+    ///
+    /// This places priority on the [`original`] field.
+    ///
+    /// [`original`]: #structfield.original
     pub fn largest<'a>(&'a self) -> Option<&'a String> {
-        self.large.as_ref()
+        self.original.as_ref()
+            .or(self.large.as_ref())
             .or(self.medium.as_ref())
-            .or(self.original.as_ref())
             .or(self.small.as_ref())
             .or(self.tiny.as_ref())
     }
