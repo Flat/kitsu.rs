@@ -113,7 +113,7 @@ mod tests {
 
     #[test]
     fn user() {
-        let _ = ::search_users(|f| f.filter("name", "Josh")).expect("Josh");
+        let _ = ::search_users(|f| f.filter("query", "Josh")).expect("List of users returned by Josh");
         let _ = ::get_user(2).expect("User: Josh");
     }
 }

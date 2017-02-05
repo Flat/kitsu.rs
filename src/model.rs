@@ -623,7 +623,7 @@ pub struct UserAttributes {
     #[serde(rename="aboutFormatted")]
     pub about_formatted: Option<String>,
     /// Links to the user's avatar.
-    pub avatar: Image,
+    pub avatar: Option<Image>,
     /// A short (140 character) biographical blurb about the user.
     ///
     /// # Examples
@@ -645,7 +645,7 @@ pub struct UserAttributes {
     pub comments_count: u64,
     /// Links to the user's cover image.
     #[serde(rename="coverImage")]
-    pub cover_image: Image,
+    pub cover_image: Option<Image>,
     /// When the user signed up.
     ///
     /// # Examples
@@ -687,7 +687,7 @@ pub struct UserAttributes {
     /// [`Gender::female`]
     ///
     /// [`Gender::female`]: enum.Gender.html#variant.female
-    pub gender: Option<Gender>,
+    pub gender: Option<String>,
     /// Number of minutes of anime watched.
     ///
     /// # Examples
@@ -783,6 +783,22 @@ pub struct UserAttributes {
     ///
     /// `https://en.wikipedia.org/wiki/Nichijou`
     pub website: Option<String>,
+}
+
+impl User {
+    /// Generates a URL to the Kitsu page for the user.
+    #[inline]
+    pub fn url(&self) -> String {
+        self.attributes.url()
+    }
+}
+
+impl UserAttributes {
+    /// Generates a URL to the Kitsu page for the manga.
+    #[inline]
+    pub fn url(&self) -> String {
+        format!("https://kitsu.io/users/{}", self.name)
+    }
 }
 
 /// Relationships for a [`User`].
@@ -924,41 +940,6 @@ impl AnimeType {
     /// ```
     ///
     /// [`Anime`]: struct.Anime.html
-    pub fn name(&self) -> Result<String> {
-        let mut name = serde_json::to_string(self)?;
-
-        let _ = name.remove(0);
-        let _ = name.pop();
-
-        Ok(name)
-    }
-}
-
-/// The [`User`]'s gender.
-///
-/// [`User`]: struct.User.html
-#[derive(Clone, Copy, Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
-pub enum Gender {
-    /// Indicator that the user is female.
-    #[serde(rename="female")]
-    Female,
-    #[serde(rename="male")]
-    /// Indicator that the user is male.
-    Male,
-}
-
-impl Gender {
-    /// The name of the [user][`User`]'s gender.
-    ///
-    /// # Examples
-    ///
-    /// ```rust
-    /// use kitsu_io::model::Gender;
-    ///
-    /// assert_eq!(Gender::Female.name().unwrap(), "female");
-    /// ```
-    ///
-    /// [`User`]: struct.User.html
     pub fn name(&self) -> Result<String> {
         let mut name = serde_json::to_string(self)?;
 
