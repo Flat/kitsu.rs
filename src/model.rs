@@ -442,7 +442,7 @@ pub struct MangaAttributes {
     #[serde(rename="ratingFrequencies")]
     pub rating_frequencies: RatingFrequencies,
     /// Name of media of serialization.
-    pub serialization: String,
+    pub serialization: Option<String>,
     /// Unique slug used for page URLs.
     ///
     /// # Examples
