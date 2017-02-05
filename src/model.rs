@@ -794,7 +794,7 @@ impl User {
 }
 
 impl UserAttributes {
-    /// Generates a URL to the Kitsu page for the manga.
+    /// Generates a URL to the Kitsu page for the user.
     #[inline]
     pub fn url(&self) -> String {
         format!("https://kitsu.io/users/{}", self.name)
