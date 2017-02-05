@@ -684,9 +684,7 @@ pub struct UserAttributes {
     ///
     /// # Examples
     ///
-    /// [`Gender::female`]
-    ///
-    /// [`Gender::female`]: enum.Gender.html#variant.female
+    /// `female`
     pub gender: Option<String>,
     /// Number of minutes of anime watched.
     ///
