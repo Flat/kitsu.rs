@@ -104,4 +104,16 @@ mod tests {
         // Test that AgeRating TV-Y7 is handled. Undocumented age rating.
         let _ = ::search_anime(|f| f.filter("text", "Avatar")).expect("avatar");
     }
+    #[test]
+    fn manga() {
+        // Test basic manga search
+        let _ = ::search_manga(|f| f.filter("text", "Youjo Senki")).expect("Youjo Senki");
+        let _ = ::get_manga(37629).expect("One result: Youjo Senki");
+    }
+
+    #[test]
+    fn user() {
+        let _ = ::search_users(|f| f.filter("name", "Josh")).expect("Josh");
+        let _ = ::get_user(2).expect("User: Josh");
+    }
 }

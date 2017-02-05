@@ -196,7 +196,7 @@ pub struct AnimeAttributes {
     /// `Several hundred years ago, humans were exterminated by titans...`
     pub synopsis: String,
     /// The titles of the anime.
-    pub titles: Titles,
+    pub titles: AnimeTitles,
     /// YouTube video id for PV.
     ///
     /// # Examples
@@ -400,7 +400,7 @@ pub struct MangaAttributes {
     pub canonical_title: String,
     /// The number of chapters released.
     #[serde(rename="chapterCount")]
-    pub chapter_count: u64,
+    pub chapter_count: Option<u64>,
     /// The URL template for the cover.
     ///
     /// # Examples
@@ -431,8 +431,6 @@ pub struct MangaAttributes {
     /// [`MangaType::Novel`]: enum.MangaType.html#variant.Novel
     #[serde(rename="mangaType")]
     pub kind: MangaType,
-    /// Whether the manga is Not Safe For Work.
-    pub nsfw: bool,
     /// The URL template for the poster.
     ///
     /// # Examples
@@ -457,7 +455,7 @@ pub struct MangaAttributes {
     ///
     /// `2013-04-07`
     #[serde(rename="startDate")]
-    pub start_date: String,
+    pub start_date: Option<String>,
     /// Synopsis of the manga.
     ///
     /// # Examples
@@ -465,10 +463,10 @@ pub struct MangaAttributes {
     /// `Hori may seem like a normal teenage girl, but she's a completely...`
     pub synopsis: String,
     /// The titles of the manga.
-    pub titles: Titles,
+    pub titles: MangaTitles,
     /// The number of volumes released for the manga.
     #[serde(rename="volumeCount")]
-    pub volume_count: u64,
+    pub volume_count: Option<u64>,
     /// The id of the related YouTube video.
     #[serde(rename="youtubeVideoId")]
     pub youtube_video_id: Option<String>,
@@ -537,7 +535,7 @@ pub struct RatingFrequencies {
 
 #[derive(Clone, Debug, Deserialize)]
 /// The titles of the anime.
-pub struct Titles {
+pub struct AnimeTitles {
     /// The English title of the anime.
     ///
     /// # Examples
@@ -556,6 +554,23 @@ pub struct Titles {
     ///
     /// `進撃の巨人`
     pub ja_jp: String,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+/// The titles of the manga.
+pub struct MangaTitles {
+    /// The English title of the manga.
+    ///
+    /// # Examples
+    ///
+    /// `Attack on Titan`
+    pub en: Option<String>,
+    /// The romaji title of the manga.
+    ///
+    /// # Examples
+    ///
+    /// `Shingeki no Kyojin`
+    pub en_jp: Option<String>,
 }
 
 /// Data from a response.
@@ -581,6 +596,7 @@ pub struct User {
     /// The type of item this is. Should always be [`Type::User`].
     ///
     /// [`Type::User`]: enum.Type.html#variant.User
+    #[serde(rename="type")]
     pub kind: Type,
     /// Links related to the user.
     pub links: HashMap<String, String>,
@@ -786,7 +802,7 @@ pub struct UserRelationships {
     #[serde(rename="libraryEntries")]
     pub library_entries: Relationship,
     /// Links to profiles linked to the user.
-    #[serde(rename="linkedProfiles")]
+    #[serde(rename="profileLinks")]
     pub linked_profiles: Relationship,
     /// Links to the user's media.
     #[serde(rename="mediaFollows")]
