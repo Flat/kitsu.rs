@@ -4,7 +4,7 @@ name = "kitsu_io"
 version = "0.1.0"
 
 [dependencies]
-hyper = "0.9"
+hyper = ">= 0.9, ~0.10"
 serde = "0.9"
 serde_derive = "0.9"
 serde_json = "0.9"
