@@ -555,7 +555,7 @@ pub struct Titles {
     /// # Examples
     ///
     /// `進撃の巨人`
-    pub ja_jp: String,
+    pub ja_jp: Option<String>,
 }
 
 /// Data from a response.
