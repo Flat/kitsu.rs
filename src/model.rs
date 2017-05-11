@@ -581,6 +581,7 @@ pub struct User {
     /// The type of item this is. Should always be [`Type::User`].
     ///
     /// [`Type::User`]: enum.Type.html#variant.User
+    #[serde(rename="type")]
     pub kind: Type,
     /// Links related to the user.
     pub links: HashMap<String, String>,
@@ -607,7 +608,7 @@ pub struct UserAttributes {
     #[serde(rename="aboutFormatted")]
     pub about_formatted: Option<String>,
     /// Links to the user's avatar.
-    pub avatar: Image,
+    pub avatar: Option<Image>,
     /// A short (140 character) biographical blurb about the user.
     ///
     /// # Examples
@@ -629,7 +630,7 @@ pub struct UserAttributes {
     pub comments_count: u64,
     /// Links to the user's cover image.
     #[serde(rename="coverImage")]
-    pub cover_image: Image,
+    pub cover_image: Option<Image>,
     /// When the user signed up.
     ///
     /// # Examples
@@ -786,7 +787,7 @@ pub struct UserRelationships {
     #[serde(rename="libraryEntries")]
     pub library_entries: Relationship,
     /// Links to profiles linked to the user.
-    #[serde(rename="linkedProfiles")]
+    #[serde(rename="profileLinks")]
     pub linked_profiles: Relationship,
     /// Links to the user's media.
     #[serde(rename="mediaFollows")]
