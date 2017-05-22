@@ -17,6 +17,7 @@
 use hyper::Error as HyperError;
 use serde_json::Error as SerdeError;
 use std::result::Result as StdResult;
+use native_tls::Error as TlsError;
 
 /// Common result type used throughout the library.
 pub type Result<T> = StdResult<T, Error>;
@@ -30,6 +31,8 @@ pub enum Error {
     Hyper(HyperError),
     /// An error originating from the `serde` family of libraries.
     Serde(SerdeError),
+    /// An error originating from the `hyper-native-tls` library.
+    Tls(TlsError),
 }
 
 impl From<HyperError> for Error {
@@ -41,5 +44,11 @@ impl From<HyperError> for Error {
 impl From<SerdeError> for Error {
     fn from(err: SerdeError) -> Error {
         Error::Serde(err)
+    }
+}
+
+impl From<TlsError> for Error {
+    fn from(err: TlsError) -> Error {
+        Error::Tls(err)
     }
 }
