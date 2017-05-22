@@ -119,8 +119,15 @@ mod tests {
         let _ = ::search_anime(|f| f.filter("text", "Avatar")).expect("avatar");
     }
     #[test]
-    fn users() {
-        let _ = ::search_users(|f| f.filter("query", "Josh")).expect("Josh");
-        let _ = ::get_user(1).expect("vikhyat");
+    fn manga() {
+        // Test basic manga search
+        let _ = ::search_manga(|f| f.filter("text", "Youjo Senki")).expect("Youjo Senki");
+        let _ = ::get_manga(37629).expect("One result: Youjo Senki");
+    }
+
+    #[test]
+    fn user() {
+        let _ = ::search_users(|f| f.filter("query", "Josh")).expect("List of users returned by Josh");
+        let _ = ::get_user(2).expect("User: Josh");
     }
 }

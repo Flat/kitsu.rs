@@ -196,7 +196,7 @@ pub struct AnimeAttributes {
     /// `Several hundred years ago, humans were exterminated by titans...`
     pub synopsis: String,
     /// The titles of the anime.
-    pub titles: Titles,
+    pub titles: AnimeTitles,
     /// YouTube video id for PV.
     ///
     /// # Examples
@@ -400,7 +400,7 @@ pub struct MangaAttributes {
     pub canonical_title: String,
     /// The number of chapters released.
     #[serde(rename="chapterCount")]
-    pub chapter_count: u64,
+    pub chapter_count: Option<u64>,
     /// The URL template for the cover.
     ///
     /// # Examples
@@ -431,8 +431,6 @@ pub struct MangaAttributes {
     /// [`MangaType::Novel`]: enum.MangaType.html#variant.Novel
     #[serde(rename="mangaType")]
     pub kind: MangaType,
-    /// Whether the manga is Not Safe For Work.
-    pub nsfw: bool,
     /// The URL template for the poster.
     ///
     /// # Examples
@@ -444,7 +442,7 @@ pub struct MangaAttributes {
     #[serde(rename="ratingFrequencies")]
     pub rating_frequencies: RatingFrequencies,
     /// Name of media of serialization.
-    pub serialization: String,
+    pub serialization: Option<String>,
     /// Unique slug used for page URLs.
     ///
     /// # Examples
@@ -457,7 +455,7 @@ pub struct MangaAttributes {
     ///
     /// `2013-04-07`
     #[serde(rename="startDate")]
-    pub start_date: String,
+    pub start_date: Option<String>,
     /// Synopsis of the manga.
     ///
     /// # Examples
@@ -465,10 +463,10 @@ pub struct MangaAttributes {
     /// `Hori may seem like a normal teenage girl, but she's a completely...`
     pub synopsis: String,
     /// The titles of the manga.
-    pub titles: Titles,
+    pub titles: MangaTitles,
     /// The number of volumes released for the manga.
     #[serde(rename="volumeCount")]
-    pub volume_count: u64,
+    pub volume_count: Option<u64>,
     /// The id of the related YouTube video.
     #[serde(rename="youtubeVideoId")]
     pub youtube_video_id: Option<String>,
@@ -537,7 +535,7 @@ pub struct RatingFrequencies {
 
 #[derive(Clone, Debug, Deserialize)]
 /// The titles of the anime.
-pub struct Titles {
+pub struct AnimeTitles {
     /// The English title of the anime.
     ///
     /// # Examples
@@ -556,6 +554,23 @@ pub struct Titles {
     ///
     /// `進撃の巨人`
     pub ja_jp: Option<String>,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+/// The titles of the manga.
+pub struct MangaTitles {
+    /// The English title of the manga.
+    ///
+    /// # Examples
+    ///
+    /// `Attack on Titan`
+    pub en: Option<String>,
+    /// The romaji title of the manga.
+    ///
+    /// # Examples
+    ///
+    /// `Shingeki no Kyojin`
+    pub en_jp: Option<String>,
 }
 
 /// Data from a response.
@@ -669,10 +684,8 @@ pub struct UserAttributes {
     ///
     /// # Examples
     ///
-    /// [`Gender::female`]
-    ///
-    /// [`Gender::female`]: enum.Gender.html#variant.female
-    pub gender: Option<Gender>,
+    /// `female`
+    pub gender: Option<String>,
     /// Number of minutes of anime watched.
     ///
     /// # Examples
@@ -768,6 +781,22 @@ pub struct UserAttributes {
     ///
     /// `https://en.wikipedia.org/wiki/Nichijou`
     pub website: Option<String>,
+}
+
+impl User {
+    /// Generates a URL to the Kitsu page for the user.
+    #[inline]
+    pub fn url(&self) -> String {
+        self.attributes.url()
+    }
+}
+
+impl UserAttributes {
+    /// Generates a URL to the Kitsu page for the user.
+    #[inline]
+    pub fn url(&self) -> String {
+        format!("https://kitsu.io/users/{}", self.name)
+    }
 }
 
 /// Relationships for a [`User`].
@@ -909,41 +938,6 @@ impl AnimeType {
     /// ```
     ///
     /// [`Anime`]: struct.Anime.html
-    pub fn name(&self) -> Result<String> {
-        let mut name = serde_json::to_string(self)?;
-
-        let _ = name.remove(0);
-        let _ = name.pop();
-
-        Ok(name)
-    }
-}
-
-/// The [`User`]'s gender.
-///
-/// [`User`]: struct.User.html
-#[derive(Clone, Copy, Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
-pub enum Gender {
-    /// Indicator that the user is female.
-    #[serde(rename="female")]
-    Female,
-    #[serde(rename="male")]
-    /// Indicator that the user is male.
-    Male,
-}
-
-impl Gender {
-    /// The name of the [user][`User`]'s gender.
-    ///
-    /// # Examples
-    ///
-    /// ```rust
-    /// use kitsu_io::model::Gender;
-    ///
-    /// assert_eq!(Gender::Female.name().unwrap(), "female");
-    /// ```
-    ///
-    /// [`User`]: struct.User.html
     pub fn name(&self) -> Result<String> {
         let mut name = serde_json::to_string(self)?;
 
