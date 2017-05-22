@@ -1,0 +1,16 @@
+language: rust
+rust:
+  - stable
+  - beta
+  - nightly
+os:
+  - linux
+cache:
+  directories:
+    - $TRAVIS_BUILD_DIR/target
+    - $HOME/.cargo
+matrix:
+  allow_failures:
+    - nightly
+script:
+  - cargo test --all-features
