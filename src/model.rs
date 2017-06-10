@@ -154,6 +154,13 @@ pub struct AnimeAttributes {
     /// `24`
     #[serde(rename="episodeLength")]
     pub episode_length: Option<u32>,
+    /// How many favourites the anime has.
+    ///
+    /// # Examples
+    ///
+    /// `209`
+    #[serde(rename="favoritesCount")]
+    pub favourites_count: Option<u32>,
     /// Show format of the anime.
     ///
     /// # Examples
@@ -166,6 +173,13 @@ pub struct AnimeAttributes {
     pub kind: AnimeType,
     /// Whether the anime is Not Safe For Work.
     pub nsfw: bool,
+    /// The rank based on the popularity of the anime.
+    ///
+    /// # Examples
+    ///
+    /// `2`
+    #[serde(rename="populartiyRank")]
+    pub popularity_rank: Option<u32>,
     /// The URL template for the poster.
     ///
     /// # Examples
@@ -176,6 +190,13 @@ pub struct AnimeAttributes {
     /// How many times each rating has been given to the anime.
     #[serde(rename="ratingFrequencies")]
     pub rating_frequencies: RatingFrequencies,
+    /// The rank of the anime based on its overall rating.
+    ///
+    /// # Examples
+    ///
+    /// `5`
+    #[serde(rename="ratingRank")]
+    pub rating_rank: Option<u32>,
     /// Unique slug used for page URLs.
     ///
     /// # Examples
@@ -189,6 +210,9 @@ pub struct AnimeAttributes {
     /// `2013-04-07`
     #[serde(rename="startDate")]
     pub start_date: String,
+    /// The sub type of the anime.
+    #[serde(rename="subType")]
+    pub sub_type: Option<String>,
     /// Synopsis of the anime.
     ///
     /// # Examples
@@ -197,6 +221,13 @@ pub struct AnimeAttributes {
     pub synopsis: String,
     /// The titles of the anime.
     pub titles: AnimeTitles,
+    /// The number of users who have marked the anime.
+    ///
+    /// # Examples
+    ///
+    /// `3232532`
+    #[serde(rename="userCount")]
+    pub user_count: Option<u32>,
     /// YouTube video id for PV.
     ///
     /// # Examples
@@ -431,6 +462,13 @@ pub struct MangaAttributes {
     /// [`MangaType::Novel`]: enum.MangaType.html#variant.Novel
     #[serde(rename="mangaType")]
     pub kind: MangaType,
+    /// The rank based on the popularityof the manga.
+    ///
+    /// # Examples
+    ///
+    /// `10`
+    #[serde(rename="populartiyRank")]
+    pub popularity_rank: Option<u32>,
     /// The URL template for the poster.
     ///
     /// # Examples
@@ -441,6 +479,13 @@ pub struct MangaAttributes {
     /// How many times each rating has been given to the manga.
     #[serde(rename="ratingFrequencies")]
     pub rating_frequencies: RatingFrequencies,
+    /// The rank of the manga based on its overall rating.
+    ///
+    /// # Examples
+    ///
+    /// `13`
+    #[serde(rename="ratingRank")]
+    pub rating_rank: Option<u32>,
     /// Name of media of serialization.
     pub serialization: Option<String>,
     /// Unique slug used for page URLs.
