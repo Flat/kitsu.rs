@@ -1,12 +1,38 @@
 [package]
-authors = ["Zeyla Hellyer <zey@zey.moe>"]
+authors = ["Mei Boudreau <xanizl@me.com>", "Zeyla Hellyer <zey@zey.moe>"]
 name = "kitsu_io"
-version = "0.1.0"
+version = "0.2.0"
 
-[dependencies]
-hyper = ">= 0.9, ~0.10"
-hyper-native-tls = "0.2.2"
-native-tls = "0.1.2"
-serde = "0.9"
-serde_derive = "0.9"
-serde_json = "0.9"
+[dependencies.serde]
+optional = true
+version = "~1.0"
+
+[dependencies.serde_derive]
+optional = true
+version = "~1.0"
+
+[dependencies.serde_json]
+optional = true
+version = "~1.0"
+
+[dependencies.hyper]
+optional = true
+version = "~0.11"
+
+[dependencies.hyper-tls]
+optional = true
+version = "~0.1"
+
+[dependencies.reqwest]
+optional = true
+version = "~0.8"
+
+[dev-dependencies]
+futures = "~0.1"
+tokio-core = "~0.1"
+
+[features]
+default = ["reqwest-support"]
+hyper-support = ["hyper", "hyper-tls"]
+reqwest-support = ["reqwest", "serde-items"]
+serde-items = ["serde", "serde_derive", "serde_json"]

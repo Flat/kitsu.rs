@@ -1,0 +1,11 @@
+[package]
+name = "01_reqwest"
+version = "0.1.0"
+authors = ["my name <my@email.address>"]
+
+[dependencies]
+reqwest = "0.8.0"
+
+[dependencies.kitsu_io]
+features = ["reqwest-support"]
+path = "../../"

@@ -1,36 +1,16 @@
-//! A collection of models for use with - and returned by - the Kitsu API.
-// ISC License (ISC)
-//
-// Copyright (c) 2016, Zeyla Hellyer <zey@zey.moe>
-//
-// Permission to use, copy, modify, and/or distribute this software for any
-// purpose with or without fee is hereby granted, provided that the above
-// copyright notice and this permission notice appear in all copies.
-//
-// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
-// REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
-// AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
-// INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
-// LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-// OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-// PERFORMANCE OF THIS SOFTWARE.
+//! Models in struct form, parsed out from JSON in response bodies.
 
-use serde::Deserialize;
 use serde_json;
 use std::collections::HashMap;
-use std::mem;
-use super::{Result, request};
+use ::Result;
 
-/// Information about an anime, retrieved via [`get_anime`] or [`search_anime`].
-///
-/// [`get_anime`]: ../fn.get_anime.html
-/// [`search_anime`]: ../fn.search_anime.html
+/// Information about an anime.
 #[derive(Clone, Debug, Deserialize)]
 pub struct Anime {
     /// Information about the anime.
     pub attributes: AnimeAttributes,
     /// The id of the anime.
-    pub id: u64,
+    pub id: String,
     /// The type of item this is. Should always be [`Type::Anime`].
     ///
     /// [`Type::Anime`]: enum.Type.html#variant.Anime
@@ -43,25 +23,10 @@ pub struct Anime {
 }
 
 impl Anime {
-    /// Gets an anime by its Id.
-    #[inline]
-    pub fn get(id: u64) -> Result<Anime> {
-        Ok(request::get_anime(id)?.data)
-    }
-
     /// The current airing status of the anime.
     #[inline]
     pub fn airing_status(&self) -> AiringStatus {
         self.attributes.airing_status()
-    }
-
-    /// Refreshes the instance of the anime, retrieving the anime and replacing
-    /// the current instance with it. Returns the old copy.
-    #[inline]
-    pub fn refresh(&mut self) -> Result<Anime> {
-        let id = self.id;
-
-        Ok(mem::replace(self, Anime::get(id)?))
     }
 
     /// Generates a URL to the Kitsu page for the anime.
@@ -81,6 +46,7 @@ impl Anime {
 ///
 /// [`Anime`]: struct.Anime.html
 #[derive(Clone, Debug, Deserialize)]
+#[serde(rename_all= "camelCase")]
 pub struct AnimeAttributes {
     /// Shortened nicknames for the [anime][`Anime`].
     ///
@@ -89,77 +55,66 @@ pub struct AnimeAttributes {
     /// `Attack on Titan`
     ///
     /// [`Anime`]: struct.Anime.html
-    #[serde(rename="abbreviatedTitles")]
-    pub abbreviated_titles: Vec<String>,
+    pub abbreviated_titles: Option<Vec<String>>,
     /// Age rating for the anime.
     ///
     /// # Examples
     ///
     //// [`AgeRating::R`]
-    #[serde(rename="ageRating")]
     pub age_rating: Option<AgeRating>,
     /// Description of the age rating.
     ///
     /// # Examples
     ///
     /// `Violence, Profanity`
-    #[serde(rename="ageRatingGuide")]
     pub age_rating_guide: Option<String>,
     /// The average of all user ratings for the anime.
     ///
     /// # Examples
     ///
     /// `4.26984658306698`
-    #[serde(rename="averageRating")]
-    pub average_rating: Option<f64>,
+    pub average_rating: Option<String>,
     /// Canonical title for the anime.
     ///
     /// # Examples
     ///
     /// `Attack on Titan`
-    #[serde(rename="canonicalTitle")]
     pub canonical_title: String,
     /// The URL template for the cover.
     ///
     /// # Examples
     ///
     /// `https://static.hummingbird.me/anime/7442/cover/$1.png`
-    #[serde(rename="coverImage")]
     pub cover_image: Option<CoverImage>,
     /// The cover's offset from the top.
     ///
     /// # Examples
     ///
     /// `263`
-    #[serde(rename="coverImageTopOffset")]
     pub cover_image_top_offset: u16,
     /// Date the anime finished airing.
     ///
     /// # Examples
     ///
     /// `2013-09-28`
-    #[serde(rename="endDate")]
     pub end_date: Option<String>,
     /// How many episodes the anime has.
     ///
     /// # Examples
     ///
     /// `25`
-    #[serde(rename="episodeCount")]
     pub episode_count: Option<u32>,
     /// How many minutes long each episode is.
     ///
     /// # Examples
     ///
     /// `24`
-    #[serde(rename="episodeLength")]
     pub episode_length: Option<u32>,
     /// How many favourites the anime has.
     ///
     /// # Examples
     ///
     /// `209`
-    #[serde(rename="favoritesCount")]
     pub favourites_count: Option<u32>,
     /// Show format of the anime.
     ///
@@ -178,24 +133,20 @@ pub struct AnimeAttributes {
     /// # Examples
     ///
     /// `2`
-    #[serde(rename="populartiyRank")]
     pub popularity_rank: Option<u32>,
     /// The URL template for the poster.
     ///
     /// # Examples
     ///
     /// `https://static.hummingbird.me/anime/7442/poster/$1.png`
-    #[serde(rename="posterImage")]
     pub poster_image: Image,
     /// How many times each rating has been given to the anime.
-    #[serde(rename="ratingFrequencies")]
     pub rating_frequencies: RatingFrequencies,
     /// The rank of the anime based on its overall rating.
     ///
     /// # Examples
     ///
     /// `5`
-    #[serde(rename="ratingRank")]
     pub rating_rank: Option<u32>,
     /// Unique slug used for page URLs.
     ///
@@ -208,10 +159,8 @@ pub struct AnimeAttributes {
     /// # Examples
     ///
     /// `2013-04-07`
-    #[serde(rename="startDate")]
-    pub start_date: String,
+    pub start_date: Option<String>,
     /// The sub type of the anime.
-    #[serde(rename="subType")]
     pub sub_type: Option<String>,
     /// Synopsis of the anime.
     ///
@@ -226,14 +175,12 @@ pub struct AnimeAttributes {
     /// # Examples
     ///
     /// `3232532`
-    #[serde(rename="userCount")]
     pub user_count: Option<u32>,
     /// YouTube video id for PV.
     ///
     /// # Examples
     ///
     /// `n4Nj6Y_SNYI`
-    #[serde(rename="youtubeVideoId")]
     pub youtube_video_id: Option<String>,
 }
 
@@ -353,16 +300,13 @@ impl Image {
     }
 }
 
-/// Information about a manga, retrived via [`get_manga`] or [`search_manga`].
-///
-/// [`get_manga`]: ../fn.get_manga.html
-/// [`search_manga`]: ../fn.search_manga.html
+/// Information about a manga.
 #[derive(Clone, Debug, Deserialize)]
 pub struct Manga {
     /// Information about the manga.
     pub attributes: MangaAttributes,
     /// The id of the manga.
-    pub id: u64,
+    pub id: String,
     /// The type of item this is. Should always be [`Type::Manga`].
     ///
     /// [`Type::Manga`]: enum.Type.html#variant.Manga
@@ -373,25 +317,10 @@ pub struct Manga {
 }
 
 impl Manga {
-    /// Gets a manga by its Id.
-    #[inline]
-    pub fn get(id: u64) -> Result<Manga> {
-        Ok(request::get_manga(id)?.data)
-    }
-
     /// The current airing status of the manga.
     #[inline]
     pub fn airing_status(&self) -> AiringStatus {
         self.attributes.airing_status()
-    }
-
-    /// Refreshes the instance of the manga, retrieving the manga and replacing
-    /// the current instance with it. Returns the old copy.
-    #[inline]
-    pub fn refresh(&mut self) -> Result<Manga> {
-        let id = self.id;
-
-        Ok(mem::replace(self, Manga::get(id)?))
     }
 
     /// Generates a URL to the Kitsu page for the manga.
@@ -411,47 +340,41 @@ impl Manga {
 ///
 /// [`Manga`]: struct.Manga.html
 #[derive(Clone, Debug, Deserialize)]
+#[serde(rename_all="camelCase")]
 pub struct MangaAttributes {
     /// Shortened nicknames for the manga.
-    #[serde(rename="abbreviatedTitles")]
-    pub abbreviated_titles: Vec<String>,
+    pub abbreviated_titles: Option<Vec<String>>,
     /// The average of all user ratings for the manga.
     ///
     /// # Examples
     ///
     /// `4.34926964198231`
-    #[serde(rename="averageRating")]
-    pub average_rating: Option<f64>,
+    pub average_rating: Option<String>,
     /// Canonical title for the manga.
     ///
     /// # Examples
     ///
     /// `Horimiya`
-    #[serde(rename="canonicalTitle")]
     pub canonical_title: String,
     /// The number of chapters released.
-    #[serde(rename="chapterCount")]
     pub chapter_count: Option<u64>,
     /// The URL template for the cover.
     ///
     /// # Examples
     ///
     /// `https://static.hummingbird.me/manga/22352/cover/$1.png`
-    #[serde(rename="coverImage")]
     pub cover_image: Option<CoverImage>,
     /// The cover's offset from the top.
     ///
     /// # Examples
     ///
     /// `60`
-    #[serde(rename="coverImageTopOffset")]
     pub cover_image_top_offset: u16,
     /// Date the manga finished.
     ///
     /// # Examples
     ///
     /// `2013-09-28`
-    #[serde(rename="endDate")]
     pub end_date: Option<String>,
     /// Show format of the manga.
     ///
@@ -467,24 +390,20 @@ pub struct MangaAttributes {
     /// # Examples
     ///
     /// `10`
-    #[serde(rename="populartiyRank")]
     pub popularity_rank: Option<u32>,
     /// The URL template for the poster.
     ///
     /// # Examples
     ///
     /// `https://static.hummingbird.me/manga/22352/poster/$1.png`
-    #[serde(rename="posterImage")]
     pub poster_image: Image,
     /// How many times each rating has been given to the manga.
-    #[serde(rename="ratingFrequencies")]
     pub rating_frequencies: RatingFrequencies,
     /// The rank of the manga based on its overall rating.
     ///
     /// # Examples
     ///
     /// `13`
-    #[serde(rename="ratingRank")]
     pub rating_rank: Option<u32>,
     /// Name of media of serialization.
     pub serialization: Option<String>,
@@ -499,7 +418,6 @@ pub struct MangaAttributes {
     /// # Examples
     ///
     /// `2013-04-07`
-    #[serde(rename="startDate")]
     pub start_date: Option<String>,
     /// Synopsis of the manga.
     ///
@@ -510,10 +428,8 @@ pub struct MangaAttributes {
     /// The titles of the manga.
     pub titles: MangaTitles,
     /// The number of volumes released for the manga.
-    #[serde(rename="volumeCount")]
     pub volume_count: Option<u64>,
     /// The id of the related YouTube video.
-    #[serde(rename="youtubeVideoId")]
     pub youtube_video_id: Option<String>,
 }
 
@@ -578,8 +494,8 @@ pub struct RatingFrequencies {
     pub rating_5_0: i64,
 }
 
-#[derive(Clone, Debug, Deserialize)]
 /// The titles of the anime.
+#[derive(Clone, Debug, Deserialize)]
 pub struct AnimeTitles {
     /// The English title of the anime.
     ///
@@ -601,8 +517,8 @@ pub struct AnimeTitles {
     pub ja_jp: Option<String>,
 }
 
-#[derive(Clone, Debug, Deserialize)]
 /// The titles of the manga.
+#[derive(Clone, Debug, Deserialize)]
 pub struct MangaTitles {
     /// The English title of the manga.
     ///
@@ -620,7 +536,7 @@ pub struct MangaTitles {
 
 /// Data from a response.
 #[derive(Clone, Debug, Deserialize)]
-pub struct Response<T: Deserialize> {
+pub struct Response<T> {
     /// The full data from a response.
     pub data: T,
     /// Links relevant to the search.
@@ -628,16 +544,13 @@ pub struct Response<T: Deserialize> {
     pub links: HashMap<String, String>,
 }
 
-/// Information about a user, retrieved via [`get_user`] or [`search_user`].
-///
-/// [`get_user`]: ../fn.get_user.html
-/// [`search_user`]: ../fn.search_user.html
+/// Information about a user.
 #[derive(Clone, Debug, Deserialize)]
 pub struct User {
     /// Information about the user.
     pub attributes: UserAttributes,
     /// The id of the user.
-    pub id: u64,
+    pub id: String,
     /// The type of item this is. Should always be [`Type::User`].
     ///
     /// [`Type::User`]: enum.Type.html#variant.User
@@ -653,6 +566,7 @@ pub struct User {
 ///
 /// [`User`]: struct.User.html
 #[derive(Clone, Debug, Deserialize)]
+#[serde(rename_all="camelCase")]
 pub struct UserAttributes {
     /// The raw markdown for the user's long-form about text.
     ///
@@ -665,7 +579,6 @@ pub struct UserAttributes {
     /// # Examples
     ///
     /// `I'm curious about <a href="https://kitsu.io/anime/nichijou">Nichijou</a>!`
-    #[serde(rename="aboutFormatted")]
     pub about_formatted: Option<String>,
     /// Links to the user's avatar.
     pub avatar: Option<Image>,
@@ -674,7 +587,7 @@ pub struct UserAttributes {
     /// # Examples
     ///
     /// `私、気になります!`
-    pub bio: String,
+    pub bio: Option<String>,
     /// The user's birthday.
     ///
     /// # Examples
@@ -686,44 +599,36 @@ pub struct UserAttributes {
     /// # Examples
     ///
     /// `15`
-    #[serde(rename="commentsCount")]
     pub comments_count: u64,
     /// Links to the user's cover image.
-    #[serde(rename="coverImage")]
     pub cover_image: Option<Image>,
     /// When the user signed up.
     ///
     /// # Examples
     ///
     /// `1985-07-26T22:13:20.223Z`
-    #[serde(rename="createdAt")]
     pub created_at: String,
     /// The user's Facebook id if they have signed in with Facebook.
     ///
     /// # Examples
     ///
     /// `1234567890`
-    #[serde(rename="facebookId")]
-    pub facebook_id: Option<u64>,
+    pub facebook_id: Option<String>,
     /// The number of media items the user has favorited.
-    #[serde(rename="favoritesCount")]
     pub favorites_count: u64,
     /// Whether the user's feed is completed.
-    #[serde(rename="feedCompleted")]
     pub feed_completed: bool,
     /// Number of people following this user.
     ///
     /// # Examples
     ///
     /// `12`
-    #[serde(rename="followersCount")]
     pub followers_count: u64,
     /// Number of people this user is following.
     ///
     /// # Examples
     ///
     /// `300`
-    #[serde(rename="followingCount")]
     pub following_count: u64,
     /// The user's gender, if provided.
     ///
@@ -736,21 +641,18 @@ pub struct UserAttributes {
     /// # Examples
     ///
     /// `550`
-    #[serde(rename="lifeSpentOnAnime")]
     pub life_spent_on_anime: u64,
     /// Number of posts user has liked.
     ///
     /// # Examples
     ///
     /// `12`
-    #[serde(rename="likesGivenCount")]
     pub likes_given_count: u64,
     /// Number of likes the user's post has received.
     ///
     /// # Examples
     ///
     /// `45`
-    #[serde(rename="likesReceivedCount")]
     pub likes_received_count: u64,
     /// A user-provided location.
     ///
@@ -775,30 +677,24 @@ pub struct UserAttributes {
     ///     "older name".to_owned()
     /// ]
     /// ```
-    #[serde(rename="pastNames")]
     pub past_names: Vec<String>,
     /// Number of posts user has submitted.
     ///
     /// # Examples
     ///
     /// `3`
-    #[serde(rename="postsCount")]
     pub posts_count: u64,
     /// Whether the user has finished completing their profile.
-    #[serde(rename="profileCompleted")]
     pub profile_completed: bool,
     /// When the user's pro subscripten expires.
-    #[serde(rename="proExpiresAt")]
     pub pro_expires_at: Option<String>,
     /// Number of media user has rated.
     ///
     /// # Examples
     ///
     /// `1`
-    #[serde(rename="ratingsCount")]
     pub ratings_count: u64,
     /// The number of reviews the user has posted.
-    #[serde(rename="reviewsCount")]
     pub reviews_count: u64,
     /// The user's title.
     pub title: Option<String>,
@@ -812,7 +708,6 @@ pub struct UserAttributes {
     /// `1985-07-26T22:13:20.223Z`
     ///
     /// [`created_at`]: #structfield.created_at
-    #[serde(rename="updatedAt")]
     pub updated_at: String,
     /// Whether the user has a waifu or husbando.
     ///
@@ -848,6 +743,7 @@ impl UserAttributes {
 ///
 /// [`User`]: struct.User.html
 #[derive(Clone, Debug, Deserialize)]
+#[serde(rename_all="camelCase")]
 pub struct UserRelationships {
     /// Links to users the user blocks.
     pub blocks: Relationship,
@@ -858,21 +754,16 @@ pub struct UserRelationships {
     /// Links to users the user follows.
     pub following: Relationship,
     /// Links to the user's library entries.
-    #[serde(rename="libraryEntries")]
     pub library_entries: Relationship,
     /// Links to profiles linked to the user.
-    #[serde(rename="profileLinks")]
-    pub linked_profiles: Relationship,
+    pub linked_profiles: Option<Relationship>,
     /// Links to the user's media.
-    #[serde(rename="mediaFollows")]
-    pub media_follows: Relationship,
+    pub media_follows: Option<Relationship>,
     /// Links to the user's pinned post on their profile.
-    #[serde(rename="pinnedPost")]
     pub pinned_post: Relationship,
     /// Links to the user's reviews.
     pub reviews: Relationship,
     /// Links to the user's roles.
-    #[serde(rename="userRoles")]
     pub user_roles: Relationship,
     /// Links to the user's waifu or husbando.
     pub waifu: Relationship,
@@ -954,17 +845,17 @@ impl AiringStatus {
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
 pub enum AnimeType {
     /// Indicator that the anime is a movie.
-    #[serde(rename="movie")]
+    #[serde(rename = "movie")]
     Movie,
     /// Indicator that the anime is music.
-    #[serde(rename="music")]
+    #[serde(rename = "music")]
     Music,
     /// Indicator that the anime is an Original Net Animation.
     ONA,
     /// Indicator that the anime is an Original Video Animation.
     OVA,
     /// Indicator that the anime is a special.
-    #[serde(rename="special")]
+    #[serde(rename = "special")]
     Special,
     /// Indicator that the anime is a TV show.
     TV,
@@ -997,26 +888,22 @@ impl AnimeType {
 ///
 /// [`Manga`]: struct.Manga.html
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
+#[serde(rename_all="lowercase")]
 pub enum MangaType {
     /// Indicator that the manga is a doujin.
-    #[serde(rename="doujin")]
     Doujin,
     /// Indicator that the manga is a regular manga.
-    #[serde(rename="manga")]
     Manga,
     /// Indicator that the manga is a manhua.
-    #[serde(rename="manhua")]
     Manhua,
     /// Indicator that the manga is a novel.
-    #[serde(rename="novel")]
     Novel,
     /// Indicator that the manga is a oneshot.
-    #[serde(rename="oneshot")]
     Oneshot,
 }
 
 impl MangaType {
-    /// The name of the age rating.
+    /// The name of the Manga Type.
     ///
     /// # Examples
     ///
@@ -1037,29 +924,26 @@ impl MangaType {
 
 /// The type of result from a search or retrieval.
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
+#[serde(rename_all="lowercase")]
 pub enum Type {
     /// Indicator that the result is an [`Anime`].
     ///
     /// [`Anime`]: struct.Anime.html
-    #[serde(rename="anime")]
     Anime,
     /// Indicator that the result is a drama.
-    #[serde(rename="drama")]
     Drama,
     /// Indicator that the result is a [`Manga`].
     ///
     /// [`Manga`]: struct.Manga.html
-    #[serde(rename="manga")]
     Manga,
     /// Indicator that the result is a [`User`].
     ///
     /// [`User`]: struct.User.html
-    #[serde(rename="users")]
-    User,
+    Users,
 }
 
 impl Type {
-    /// The name of the age rating.
+    /// The name of the Type.
     ///
     /// # Examples
     ///
@@ -1084,22 +968,20 @@ impl Type {
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
 pub enum WaifuOrHusbando {
     /// Indicator that the user has a husbando.
-    #[serde(rename="husbando")]
     Husbando,
     /// Indicator that the user has a waifu.
-    #[serde(rename="waifu")]
     Waifu,
 }
 
 impl WaifuOrHusbando {
-    /// The name of the age rating.
+    /// The name of the Waifu or Husbando.
     ///
     /// # Examples
     ///
     /// ```rust
     /// use kitsu_io::model::WaifuOrHusbando;
     ///
-    /// assert_eq!(WaifuOrHusbando::Husbando.name().unwrap(), "husbando");
+    /// assert_eq!(WaifuOrHusbando::Husbando.name().unwrap(), "Husbando");
     /// ```
     pub fn name(&self) -> Result<String> {
         let mut name = serde_json::to_string(self)?;
