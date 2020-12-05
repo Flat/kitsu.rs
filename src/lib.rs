@@ -45,6 +45,7 @@
 //! extern crate kitsu_io;
 //! # #[cfg(feature = "reqwest")]
 //! extern crate reqwest;
+//! extern crate url;
 //!
 //!
 //! # #[cfg(feature = "reqwest")]
