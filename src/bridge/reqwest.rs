@@ -6,13 +6,14 @@
 //!
 //! [`KitsuRequester`]: trait.KitsuRequester.html
 
-use std::io::Read;
-use reqwest::{Client as ReqwestClient, RequestBuilder, StatusCode, Url};
+use ::builder::Search;
+use ::model::{Anime, Manga, Response, User};
+use reqwest::blocking::{Client as ReqwestClient, RequestBuilder};
+use reqwest::StatusCode;
 use serde::de::DeserializeOwned;
 use serde_json;
-use ::builder::Search;
-use ::{API_URL, Error, Result};
-use ::model::{Anime, Manga, Response, User};
+use std::io::Read;
+use ::{Error, Result, API_URL};
 
 /// Trait which defines the methods necessary to interact with the service.
 ///
@@ -233,8 +234,7 @@ pub trait KitsuRequester {
     /// [`Error::ReqwestInvalid`]: ../enum.Error.html#variant.ReqwestInvalid
     /// [`Error::ReqwestParse`]: ../enum.Error.html#variant.ReqwestParse
     /// [`Error::ReqwestUnauthorized`]: ../enum.Error.html#variant.ReqwestUnauthorized
-    fn search_anime<F: FnOnce(Search) -> Search>(&self, f: F) ->
-        Result<Response<Vec<Anime>>>;
+    fn search_anime<F: FnOnce(Search) -> Search>(&self, f: F) -> Result<Response<Vec<Anime>>>;
 
     /// Gets an anime using its id.
     ///
@@ -286,8 +286,7 @@ pub trait KitsuRequester {
     /// [`Error::ReqwestInvalid`]: ../enum.Error.html#variant.ReqwestInvalid
     /// [`Error::ReqwestParse`]: ../enum.Error.html#variant.ReqwestParse
     /// [`Error::ReqwestUnauthorized`]: ../enum.Error.html#variant.ReqwestUnauthorized
-    fn search_manga<F: FnOnce(Search) -> Search>(&self, f: F) ->
-        Result<Response<Vec<Manga>>>;
+    fn search_manga<F: FnOnce(Search) -> Search>(&self, f: F) -> Result<Response<Vec<Manga>>>;
 
     /// Gets an anime using its id.
     ///
@@ -339,66 +338,62 @@ pub trait KitsuRequester {
     /// [`Error::ReqwestInvalid`]: ../enum.Error.html#variant.ReqwestInvalid
     /// [`Error::ReqwestParse`]: ../enum.Error.html#variant.ReqwestParse
     /// [`Error::ReqwestUnauthorized`]: ../enum.Error.html#variant.ReqwestUnauthorized
-    fn search_users<F: FnOnce(Search) -> Search>(&self, f: F) ->
-        Result<Response<Vec<User>>>;
+    fn search_users<F: FnOnce(Search) -> Search>(&self, f: F) -> Result<Response<Vec<User>>>;
 }
 
 impl KitsuRequester for ReqwestClient {
     fn get_anime(&self, id: u64) -> Result<Response<Anime>> {
-        let uri = Url::parse(&format!("{}/anime/{}", API_URL, id.to_string()))?;
+        let uri = url::Url::parse(&format!("{}/anime/{}", API_URL, id.to_string()))?;
 
-        handle_request::<Response<Anime>>(&mut self.get(uri))
+        handle_request::<Response<Anime>>(self.get(uri))
     }
 
     fn get_manga(&self, id: u64) -> Result<Response<Manga>> {
-        let uri = Url::parse(&format!("{}/manga/{}", API_URL, id.to_string()))?;
+        let uri = url::Url::parse(&format!("{}/manga/{}", API_URL, id.to_string()))?;
 
-        handle_request::<Response<Manga>>(&mut self.get(uri))
+        handle_request::<Response<Manga>>(self.get(uri))
     }
 
     fn get_user(&self, id: u64) -> Result<Response<User>> {
-        let uri = Url::parse(&format!("{}/users/{}", API_URL, id.to_string()))?;
+        let uri = url::Url::parse(&format!("{}/users/{}", API_URL, id.to_string()))?;
 
-        handle_request::<Response<User>>(&mut self.get(uri))
+        handle_request::<Response<User>>(self.get(uri))
     }
 
-    fn search_anime<F: FnOnce(Search) -> Search>(&self, f: F) ->
-        Result<Response<Vec<Anime>>> {
+    fn search_anime<F: FnOnce(Search) -> Search>(&self, f: F) -> Result<Response<Vec<Anime>>> {
         let params = f(Search::default()).0;
-        let uri = Url::parse(&format!("{}/anime?{}", API_URL, params))?;
+        let uri = url::Url::parse(&format!("{}/anime?{}", API_URL, params))?;
 
-        handle_request::<Response<Vec<Anime>>>(&mut self.get(uri))
+        handle_request::<Response<Vec<Anime>>>(self.get(uri))
     }
 
-    fn search_manga<F: FnOnce(Search) -> Search>(&self, f: F) ->
-        Result<Response<Vec<Manga>>> {
+    fn search_manga<F: FnOnce(Search) -> Search>(&self, f: F) -> Result<Response<Vec<Manga>>> {
         let params = f(Search::default()).0;
-        let uri = Url::parse(&format!("{}/manga?{}", API_URL, params))?;
+        let uri = url::Url::parse(&format!("{}/manga?{}", API_URL, params))?;
 
-        handle_request::<Response<Vec<Manga>>>(&mut self.get(uri))
+        handle_request::<Response<Vec<Manga>>>(self.get(uri))
     }
 
-    fn search_users<F: FnOnce(Search) -> Search>(&self, f: F) ->
-        Result<Response<Vec<User>>> {
+    fn search_users<F: FnOnce(Search) -> Search>(&self, f: F) -> Result<Response<Vec<User>>> {
         let params = f(Search::default()).0;
-        let uri = Url::parse(&format!("{}/users?{}", API_URL, params))?;
+        let uri = url::Url::parse(&format!("{}/users?{}", API_URL, params))?;
 
-        handle_request::<Response<Vec<User>>>(&mut self.get(uri))
+        handle_request::<Response<Vec<User>>>(self.get(uri))
     }
 }
 
-fn handle_request<T: DeserializeOwned>(request: &mut RequestBuilder) -> Result<T> {
+fn handle_request<T: DeserializeOwned>(request: RequestBuilder) -> Result<T> {
     let response = request.send()?;
 
     match response.status() {
-        StatusCode::Ok => {},
-        StatusCode::BadRequest => {
-            return Err(Error::ReqwestBad(Box::new(response)));
-        },
-        StatusCode::Unauthorized => {
-            return Err(Error::ReqwestUnauthorized(Box::new(response)));
-        },
-        _ => return Err(Error::ReqwestInvalid(Box::new(response))),
+        StatusCode::OK => {}
+        StatusCode::BAD_REQUEST => {
+            return Err(Error::ReqwestBad());
+        }
+        StatusCode::UNAUTHORIZED => {
+            return Err(Error::ReqwestUnauthorized());
+        }
+        _ => return Err(Error::ReqwestInvalid()),
     }
 
     from_reader(response)

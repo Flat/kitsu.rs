@@ -1,17 +1,12 @@
 #[cfg(feature = "reqwest")]
 use serde_json::Error as JsonError;
-use std::error::Error as StdError;
 use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::result::Result as StdResult;
 
 #[cfg(feature = "hyper")]
 use hyper::error::UriError;
 #[cfg(feature = "reqwest")]
-use reqwest::{
-    Error as ReqwestError,
-    Response as ReqwestResponse,
-    UrlError as ReqwestUrlError,
-};
+use reqwest::Error as ReqwestError;
 
 /// A result type to compose a successful value and the library's [`Error`]
 /// type.
@@ -34,20 +29,21 @@ pub enum Error {
     Reqwest(ReqwestError),
     /// An error indicating a bad request when using `reqwest`.
     #[cfg(feature = "reqwest")]
-    ReqwestBad(Box<ReqwestResponse>),
+    ReqwestBad(),
     /// An error indicating an invalid request when using `reqwest`.
     #[cfg(feature = "reqwest")]
-    ReqwestInvalid(Box<ReqwestResponse>),
-    /// An error indicating a parsing issue when using `reqwest`.
-    #[cfg(feature = "reqwest")]
-    ReqwestParse(ReqwestUrlError),
+    ReqwestInvalid(),
     /// An error indicating an unathorized request when using `reqwest`.
     #[cfg(feature = "reqwest")]
-    ReqwestUnauthorized(Box<ReqwestResponse>),
+    ReqwestUnauthorized(),
     /// An error when building a request's URI from the `hyper` crate when it is
     /// enabled.
     #[cfg(feature = "hyper")]
     Uri(UriError),
+
+    /// An error when parsing the URL
+    #[cfg(feature = "reqwest")]
+    ParseError(url::ParseError),
 }
 
 #[cfg(feature = "reqwest")]
@@ -65,9 +61,9 @@ impl From<ReqwestError> for Error {
 }
 
 #[cfg(feature = "reqwest")]
-impl From<ReqwestUrlError> for Error {
-    fn from(err: ReqwestUrlError) -> Self {
-        Error::ReqwestParse(err)
+impl From<url::ParseError> for Error {
+    fn from(err: url::ParseError) -> Self {
+        Error::ParseError(err)
     }
 }
 
@@ -80,27 +76,6 @@ impl From<UriError> for Error {
 
 impl Display for Error {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        f.write_str(self.description())
-    }
-}
-
-impl StdError for Error {
-    fn description(&self) -> &str {
-        match *self {
-            #[cfg(feature = "reqwest")]
-            Error::Json(ref inner) => inner.description(),
-            #[cfg(feature = "reqwest")]
-            Error::Reqwest(ref inner) => inner.description(),
-            #[cfg(feature = "reqwest")]
-            Error::ReqwestBad(_) => "Request bad",
-            #[cfg(feature = "reqwest")]
-            Error::ReqwestInvalid(_) => "Request invalid",
-            #[cfg(feature = "reqwest")]
-            Error::ReqwestParse(ref inner) => inner.description(),
-            #[cfg(feature = "reqwest")]
-            Error::ReqwestUnauthorized(_) => "Request auth bad",
-            #[cfg(feature = "hyper")]
-            Error::Uri(ref inner) => inner.description(),
-        }
+        f.write_str(&*self.to_string())
     }
 }

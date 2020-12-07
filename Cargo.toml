@@ -3,6 +3,9 @@ authors = ["Mei Boudreau <xanizl@me.com>", "Zeyla Hellyer <zey@zey.moe>"]
 name = "kitsu_io"
 version = "0.2.0"
 
+[dependencies]
+url = "2.2.0"
+
 [dependencies.serde]
 optional = true
 version = "~1.0"
@@ -17,19 +20,20 @@ version = "~1.0"
 
 [dependencies.hyper]
 optional = true
-version = "~0.11"
+version = "~0.13"
 
 [dependencies.hyper-tls]
 optional = true
-version = "~0.1"
+version = "~0.4"
 
 [dependencies.reqwest]
 optional = true
-version = "~0.8"
+version = "~0.10"
+features = ["blocking"]
 
 [dev-dependencies]
 futures = "~0.1"
-tokio-core = "~0.1"
+tokio = "~0.3"
 
 [features]
 default = ["reqwest-support"]
